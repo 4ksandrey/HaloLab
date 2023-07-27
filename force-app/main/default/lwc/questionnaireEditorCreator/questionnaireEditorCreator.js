@@ -39,11 +39,73 @@ export default class QuestionnaireEditorCreator extends LightningElement {
         this.caseType = event.target.value;
     }
 
+    @track listOfQuestionnaires;
+    connectedCallback() {
+        loadStyle(this, myComponentStyles);
+        this.initData();
+    }
+
+    initData() {
+        let listOfQuestionnaires = [];
+        this.createRow(listOfQuestionnaires);
+        this.listOfQuestionnaires = listOfQuestionnaires;
+    }
+
+    createRow(listOfQuestionnaires) {
+        let questionnaireObject = {};
+        if(listOfQuestionnaires.length > 0) {
+            questionnaireObject.index = listOfQuestionnaires[listOfQuestionnaires.length - 1].index + 1;
+        } else {
+            questionnaireObject.index = 1;
+        }
+        questionnaireObject.Field = null;
+        questionnaireObject.Picklist = null;
+        questionnaireObject.maxLength = null;
+        listOfQuestionnaires.push(questionnaireObject);
+    }
+
+    addNewRow() {
+        this.createRow(this.listOfQuestionnaires);
+    }
+
+    removeRow(event) {
+        let toBeDeletedRowIndex = event.target.name;
+        let listOfQuestionnaires = [];
+        for(let i = 0; i < this.listOfQuestionnaires.length; i++) {
+            let tempRecord = Object.assign({}, this.listOfQuestionnaires[i]);
+            if(tempRecord.index !== toBeDeletedRowIndex) {
+                listOfQuestionnaires.push(tempRecord);
+            }
+        }
+        for(let i = 0; i < listOfQuestionnaires.length; i++) {
+            listOfQuestionnaires[i].index = i + 1;
+        }
+        this.listOfQuestionnaires = listOfQuestionnaires;
+    }
+
+    removeAllRows() {
+        let listOfQuestionnaires = [];
+        this.createRow(listOfQuestionnaires);
+        this.listOfQuestionnaires = listOfQuestionnaires;
+    }
+
+    handleInputChange(event) {
+        let index = event.target.dataset.id;
+        let fieldName = event.target.name;
+        let value = event.target.value;
+        for(let i = 0; i < this.listOfQuestionnaires.length; i++) {
+            if(this.listOfQuestionnaires[i].index === parseInt(index)) {
+                this.listOfQuestionnaires[i][fieldName] = value;
+            }
+        }
+        console.log(this.listOfQuestionnaires);
+    } 
+    
     handleSave() {
         let fieldsData = '';
-        this.listOfAccounts.forEach((record, index) => {
+        this.listOfQuestionnaires.forEach((record, index) => {
             fieldsData += `${record.Field}:${record.Picklist}:${record.maxLength}`;
-            if (index < this.listOfAccounts.length - 1) {
+            if (index < this.listOfQuestionnaires.length - 1) {
                 fieldsData += '\n';
             }
         });
@@ -53,7 +115,7 @@ export default class QuestionnaireEditorCreator extends LightningElement {
             field: fieldsData
         })
         .then(newQuestionnaireId => {
-            console.log('Новый опросник успешно создан!');
+            console.log('New Questionnaire created successfully!');
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Success',
@@ -63,76 +125,14 @@ export default class QuestionnaireEditorCreator extends LightningElement {
             );      
         })
         .catch(error => {
-            console.error('Ошибка при создании опросника:', error);
+            console.error('Error during creating new Questionnaire', error);
             this.dispatchEvent(
                 new ShowToastEvent({
-                    title: 'Ошибка',
-                    message: 'Ошибка при создании опросника',
+                    title: 'Error',
+                    message: 'Error during creating new Questionnaire',
                     variant: 'error'
                 })
             );
         });
     }
-
-    @track listOfAccounts;
-    connectedCallback() {
-        loadStyle(this, myComponentStyles);
-        this.initData();
-    }
-
-    initData() {
-        let listOfAccounts = [];
-        this.createRow(listOfAccounts);
-        this.listOfAccounts = listOfAccounts;
-    }
-
-    createRow(listOfAccounts) {
-        let accountObject = {};
-        if(listOfAccounts.length > 0) {
-            accountObject.index = listOfAccounts[listOfAccounts.length - 1].index + 1;
-        } else {
-            accountObject.index = 1;
-        }
-        accountObject.Field = null;
-        accountObject.Picklist = null;
-        accountObject.maxLength = null;
-        listOfAccounts.push(accountObject);
-    }
-
-    addNewRow() {
-        this.createRow(this.listOfAccounts);
-    }
-
-    removeRow(event) {
-        let toBeDeletedRowIndex = event.target.name;
-        let listOfAccounts = [];
-        for(let i = 0; i < this.listOfAccounts.length; i++) {
-            let tempRecord = Object.assign({}, this.listOfAccounts[i]);
-            if(tempRecord.index !== toBeDeletedRowIndex) {
-                listOfAccounts.push(tempRecord);
-            }
-        }
-        for(let i = 0; i < listOfAccounts.length; i++) {
-            listOfAccounts[i].index = i + 1;
-        }
-        this.listOfAccounts = listOfAccounts;
-    }
-
-    removeAllRows() {
-        let listOfAccounts = [];
-        this.createRow(listOfAccounts);
-        this.listOfAccounts = listOfAccounts;
-    }
-
-    handleInputChange(event) {
-        let index = event.target.dataset.id;
-        let fieldName = event.target.name;
-        let value = event.target.value;
-        for(let i = 0; i < this.listOfAccounts.length; i++) {
-            if(this.listOfAccounts[i].index === parseInt(index)) {
-                this.listOfAccounts[i][fieldName] = value;
-            }
-        }
-        console.log(this.listOfAccounts);
-    }    
 }
