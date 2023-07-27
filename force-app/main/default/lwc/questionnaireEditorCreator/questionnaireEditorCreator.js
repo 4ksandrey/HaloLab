@@ -1,9 +1,11 @@
 import { LightningElement, track, wire } from 'lwc';
 import createNewQuestionnaire from '@salesforce/apex/QuestionnaireCreateUpdateController.createNewQuestionnaire';
+import updateQuestionnaire from '@salesforce/apex/QuestionnaireCreateUpdateController.updateQuestionnaire';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getCaseTypeNames from "@salesforce/apex/QuestionnaireController.getCaseTypes";
 import { loadStyle } from 'lightning/platformResourceLoader';
 import myComponentStyles from '@salesforce/resourceUrl/myComponentStyles';
+import getQuestionnaireList from '@salesforce/apex/CustomQuestionnaireSearch.getQuestionnaireList';
 
 export default class QuestionnaireEditorCreator extends LightningElement {
     @track selectedCaseType;
@@ -130,6 +132,80 @@ export default class QuestionnaireEditorCreator extends LightningElement {
                 new ShowToastEvent({
                     title: 'Error',
                     message: 'Error during creating new Questionnaire',
+                    variant: 'error'
+                })
+            );
+        });
+    }
+
+    @track questionnaires;
+    @track selectedQuestionnaireId;
+    searchValue = '';
+
+    searchKeyword(event) {
+        this.searchValue = event.target.value;
+    }
+
+    handleSearchKeyword() {
+        if (this.searchValue !== '') {
+            getQuestionnaireList({
+                searchKey: this.searchValue
+            })
+                .then(result => {
+                    this.questionnaires = result;
+                })
+                .catch(error => {
+                    const event = new ShowToastEvent({
+                        title: 'Error',
+                        variant: 'error',
+                        message: error.body.message,
+                    });
+                    this.dispatchEvent(event);
+                    this.questionnaires = null;
+                });
+        } else {
+            const event = new ShowToastEvent({
+                variant: 'error',
+                message: 'Search text missing..',
+            });
+            this.dispatchEvent(event);
+        }
+    }
+
+    handleSelect(event) {
+        this.selectedQuestionnaireId = event.target.value;
+    }
+
+    handleUpdate() {
+        let fieldsData = '';
+        this.listOfQuestionnaires.forEach((record, index) => {
+            fieldsData += `${record.Field}:${record.Picklist}:${record.maxLength}`;
+            if (index < this.listOfQuestionnaires.length - 1) {
+                fieldsData += '\n';
+            }
+        });
+        updateQuestionnaire({
+            recordId: this.selectedQuestionnaireId,
+            questionnaireName: this.questionnaireName,
+            caseType: this.caseType,
+            field: fieldsData
+        })
+        .then(newQuestionnaireId => {
+            console.log('Questionnaire was updated successfully!');
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Questionnaire was updated successfully!',
+                    variant: 'success',
+                }),
+            );      
+        })
+        .catch(error => {
+            console.error('Error during update Questionnaire', error);
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: 'Error during update Questionnaire',
                     variant: 'error'
                 })
             );

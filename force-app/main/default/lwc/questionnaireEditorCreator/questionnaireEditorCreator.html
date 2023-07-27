@@ -69,20 +69,142 @@
                     </div>
                     <!-- Footer -->
                     <footer class="slds-modal__footer">
-                        <lightning-button icon-name="utility:save" variant="brand" label="Create" title="Create Accounts" onclick={handleSave}></lightning-button>
+                        <lightning-button icon-name="utility:save" variant="brand" label="Create" title="Create Questionnaire" onclick={handleSave}></lightning-button>
                     </footer>
                 </lightning-card>        
         </lightning-tab>
         <lightning-tab label="Update">
+            <header class="slds-card__header slds-media slds-media_center">
+                <div class="slds-media__figure">
+                    <lightning-icon icon-name="standard:account" size="small"></lightning-icon>
+                </div>
+                <div class="slds-media__body slds-card__header-title slds-text-title_bold" style="font-size: 14px">
+                    Questionnaire Update
+                </div>
+            </header>
             <div class="slds-m-around_medium">
-                <!-- Форма для обновления существующей записи -->
-                <lightning-input label="Questionnaire Id" value={questionnaireId} onchange={handleInputChange}></lightning-input>
-                <lightning-input label="First Name" value={updatedFirstName} onchange={handleInputChange}></lightning-input>
-                <lightning-input label="Last Name" value={updatedLastName} onchange={handleInputChange}></lightning-input>
-                <lightning-input label="Picklist" value={updatedPicklist} onchange={handleInputChange}></lightning-input>
-                <lightning-input type="checkbox" label="Injured" checked={updatedInjured} onchange={handleCheckboxChange}></lightning-input>
-                <lightning-button label="Update" onclick={handleUpdate}></lightning-button>
-            </div>
+      
+                <div class="slds-m-bottom_small">
+                    <lightning-input type="text"
+                       value={searchValue}
+                       label="Questionnaire Name"
+                       onchange={searchKeyword}
+                       ></lightning-input>
+                 </div>
+                 
+                 <lightning-button label="Search"
+                    onclick={handleSearchKeyword}
+                    variant="brand"></lightning-button>
+                
+                 <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-m-top_small">
+                    <thead>
+                       <tr class="slds-line-height_reset">
+                          <th class="" scope="col">
+                             <div class="slds-truncate" title="First Name">Id</div>
+                          </th>
+                          <th class="" scope="col">
+                             <div class="slds-truncate" title="Last Name">Name</div>
+                          </th>
+                          <th class="" scope="col">
+                             <div class="slds-truncate" title="Phone">Case Type</div>
+                          </th>
+                          <th class="" scope="col">
+                             <div class="slds-truncate" title="Email">Fields</div>
+                          </th>
+                       </tr>
+                    </thead>
+                    
+                    <tbody>   
+                       <template for:each={questionnaires} for:item="que">
+                          <tr class="slds-hint-parent" key={questionnaires.Id}>
+                             <td>
+                                <div class="slds-truncate">{que.Id}</div>
+                             </td>
+                             <td>
+                                <div class="slds-truncate">{que.Name}</div>
+                             </td>
+                             <td>
+                                <div class="slds-truncate">
+                                   <lightning-formatted-phone value={que.Case_Type__c} ></lightning-formatted-phone>
+                                </div>
+                             </td>
+                             <td>
+                                <div class="slds-truncate">
+                                   <lightning-formatted-email value={que.Fields__c} ></lightning-formatted-email>
+                                </div>
+                             </td>
+                             <td>
+                                <div class="slds-truncate">
+                                    <lightning-button label="Select" variant="brand" value={que.Id} onclick={handleSelect}></lightning-button>
+                                </div>
+                            </td>
+                          </tr>
+                       </template>
+                    </tbody>
+                 </table>
+              </div>
+                <lightning-card>
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col slds-size_6-of-12 slds-p-around_medium">
+                            <lightning-combobox
+                                label="Case Type"
+                                value={selectedCaseType}
+                                options={caseTypeOptions}
+                                onchange={handleCaseTypeChange}
+                            ></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-around_medium">
+                            <lightning-input label="Questionnaire Name" value={questionnaireName} onchange={handleQuestionnaireNameChange}></lightning-input>
+                        </div>
+                    </div>
+                    <!-- Table -->
+                    <table class="slds-table slds-table_bordered slds-no-row-hover slds-table_cell-buffer" role="grid">
+                        <thead>
+                        <tr>
+                            <th scope="col" height="22" style="width: 3rem">Nr.</th>
+                            <th scope="col" height="22">Field</th>
+                            <th scope="col" height="22">Type</th>
+                            <th scope="col" height="22">Max Length</th>
+                            <th scope="col" height="22" style="width: 3rem"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <template for:each={listOfQuestionnaires} for:item="rec">
+                            <tr key={rec} class="slds-hint-parent">
+                                <td style="font-weight: bold">
+                                    <lightning-formatted-number value={rec.index}></lightning-formatted-number>.
+                                </td>
+                                <td>
+                                    <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="Field" value={rec.Field} onchange={handleInputChange}></lightning-input>
+                                </td>
+                                <td>
+                                    <lightning-combobox class="picklist-padding"
+                                        data-id={rec.index} 
+                                        name="Picklist"
+                                        value={rec.Picklist}
+                                        options={fieldTypeOptions}
+                                        onchange={handleInputChange}
+                                    ></lightning-combobox>
+                                </td>
+                                <td>
+                                    <lightning-input type="number" variant="label-hidden" label="" data-id={rec.index} name="maxLength" value={rec.maxLength} onchange={handleInputChange}></lightning-input>
+                                </td>
+                                <td>
+                                    <lightning-button-icon icon-name="utility:delete" alternative-text="Remove" title="Remove" name={rec.index} onclick={removeRow}></lightning-button-icon>
+                                </td>
+                            </tr>
+                        </template>
+                        </tbody>
+                    </table>
+                    <div class="slds-p-left_small slds-p-vertical_small">
+                        <lightning-button class="slds-p-right_small" variant="destructive" label="delete all rows" title="delete all rows" icon-name="utility:recycle_bin_full" onclick={removeAllRows}></lightning-button>
+                        <lightning-button variant="neutral" label="add additional row" title="add additional row" icon-name="utility:add" onclick={addNewRow}></lightning-button>
+                    </div>
+                    <!-- Footer -->
+                    <footer class="slds-modal__footer">
+                        <lightning-button icon-name="utility:save" variant="brand" label="Update" title="Update Questionnaire" onclick={handleUpdate}></lightning-button>
+                    </footer>
+                </lightning-card>
         </lightning-tab>
     </lightning-tabset>
 </template>
