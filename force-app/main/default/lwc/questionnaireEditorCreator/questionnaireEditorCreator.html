@@ -1,7 +1,6 @@
 <template>
-    <lightning-tabset class="slds-tabs_scoped slds-is-active" variant="scoped">
-        <lightning-tab label="Create" class="slds-m-around_medium slds-tabs_default__item">
-            
+    <lightning-tabset variant="scoped">
+        <lightning-tab label="Create" >
             <header class="slds-card__header slds-media slds-media_center">
                 <div class="slds-media__figure">
                     <lightning-icon icon-name="standard:account" size="small"></lightning-icon>
@@ -31,36 +30,44 @@
                             <th scope="col" height="22" style="width: 3rem">Nr.</th>
                             <th scope="col" height="22">Field</th>
                             <th scope="col" height="22">Type</th>
-                            <th scope="col" height="22">Max Length</th>
+                            <th scope="col" height="22">Value</th>
                             <th scope="col" height="22" style="width: 3rem"></th>
                         </tr>
                         </thead>
                         <tbody>
-                        <template for:each={listOfQuestionnaires} for:item="rec">
-                            <tr key={rec} class="slds-hint-parent">
-                                <td style="font-weight: bold">
-                                    <lightning-formatted-number value={rec.index}></lightning-formatted-number>.
-                                </td>
-                                <td>
-                                    <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="Field" value={rec.Field} onchange={handleInputChange}></lightning-input>
-                                </td>
-                                <td>
-                                    <lightning-combobox class="picklist-padding"
-                                        data-id={rec.index} 
-                                        name="Picklist"
-                                        value={rec.Picklist}
-                                        options={fieldTypeOptions}
-                                        onchange={handleInputChange}
-                                    ></lightning-combobox>
-                                </td>
-                                <td>
-                                    <lightning-input type="number" variant="label-hidden" label="" data-id={rec.index} name="maxLength" value={rec.maxLength} onchange={handleInputChange}></lightning-input>
-                                </td>
-                                <td>
-                                    <lightning-button-icon icon-name="utility:delete" alternative-text="Remove" title="Remove" name={rec.index} onclick={removeRow}></lightning-button-icon>
-                                </td>
-                            </tr>
-                        </template>
+                            <template for:each={listOfQuestionnaires} for:item="rec">
+                                <tr key={rec} class="slds-hint-parent">
+                                    <td style="font-weight: bold">
+                                        <lightning-formatted-number value={rec.index}></lightning-formatted-number>.
+                                    </td>
+                                    <td>
+                                        <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="Field" value={rec.Field} onchange={handleInputChange}></lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-combobox class="picklist-padding"
+                                            data-id={rec.index} 
+                                            name="Picklist"
+                                            value={rec.Picklist}
+                                            options={fieldTypeOptions}
+                                            onchange={handleInputChange}
+                                        ></lightning-combobox>
+                                    </td>
+                                    <td>
+                                        <template if:true={rec.isTextFieldOrTextArea}>
+                                            <lightning-input type="number" variant="label-hidden" label="" data-id={rec.index} name="maxLength" placeholder="Max Length" value={rec.maxLength} onchange={handleInputChange} style="width:100%;"></lightning-input>
+                                        </template>
+                                        <template if:true={rec.isPicklist}>
+                                            <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="picklistValues" placeholder="Picklist Values" value={rec.picklistValues} onchange={handleInputChange} style="width:100%;"></lightning-input>
+                                        </template>
+                                        <template if:true={rec.isCheckbox}>
+                                            <lightning-input disabled type="text" variant="label-hidden" label="" data-id={rec.index} name="checkboxPlaceholder" value="" style="width:100%;"></lightning-input>
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <lightning-button-icon icon-name="utility:delete" alternative-text="Remove" title="Remove" name={rec.index} onclick={removeRow}></lightning-button-icon>
+                                    </td>
+                                </tr>
+                            </template>                            
                         </tbody>
                     </table>
                     <div class="slds-p-left_small slds-p-vertical_small">
@@ -130,7 +137,7 @@
                              </td>
                              <td>
                                 <div class="slds-truncate">
-                                   <lightning-formatted-email value={que.Fields__c} ></lightning-formatted-email>
+                                    <lightning-formatted-email value={que.shortenedField}></lightning-formatted-email>
                                 </div>
                              </td>
                              <td>
@@ -160,40 +167,48 @@
                     <!-- Table -->
                     <table class="slds-table slds-table_bordered slds-no-row-hover slds-table_cell-buffer" role="grid">
                         <thead>
-                        <tr>
-                            <th scope="col" height="22" style="width: 3rem">Nr.</th>
-                            <th scope="col" height="22">Field</th>
-                            <th scope="col" height="22">Type</th>
-                            <th scope="col" height="22">Max Length</th>
-                            <th scope="col" height="22" style="width: 3rem"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <template for:each={listOfQuestionnaires} for:item="rec">
-                            <tr key={rec} class="slds-hint-parent">
-                                <td style="font-weight: bold">
-                                    <lightning-formatted-number value={rec.index}></lightning-formatted-number>.
-                                </td>
-                                <td>
-                                    <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="Field" value={rec.Field} onchange={handleInputChange}></lightning-input>
-                                </td>
-                                <td>
-                                    <lightning-combobox class="picklist-padding"
-                                        data-id={rec.index} 
-                                        name="Picklist"
-                                        value={rec.Picklist}
-                                        options={fieldTypeOptions}
-                                        onchange={handleInputChange}
-                                    ></lightning-combobox>
-                                </td>
-                                <td>
-                                    <lightning-input type="number" variant="label-hidden" label="" data-id={rec.index} name="maxLength" value={rec.maxLength} onchange={handleInputChange}></lightning-input>
-                                </td>
-                                <td>
-                                    <lightning-button-icon icon-name="utility:delete" alternative-text="Remove" title="Remove" name={rec.index} onclick={removeRow}></lightning-button-icon>
-                                </td>
+                            <tr>
+                                <th scope="col" height="22" style="width: 3rem">Nr.</th>
+                                <th scope="col" height="22">Field</th>
+                                <th scope="col" height="22">Type</th>
+                                <th scope="col" height="22">Value</th>
+                                <th scope="col" height="22" style="width: 3rem"></th>
                             </tr>
-                        </template>
+                            </thead>
+                        <tbody>
+                            <template for:each={listOfQuestionnaires} for:item="rec">
+                                <tr key={rec} class="slds-hint-parent">
+                                    <td style="font-weight: bold">
+                                        <lightning-formatted-number value={rec.index}></lightning-formatted-number>.
+                                    </td>
+                                    <td>
+                                        <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="Field" value={rec.Field} onchange={handleInputChange}></lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-combobox class="picklist-padding"
+                                            data-id={rec.index} 
+                                            name="Picklist"
+                                            value={rec.Picklist}
+                                            options={fieldTypeOptions}
+                                            onchange={handleInputChange}
+                                        ></lightning-combobox>
+                                    </td>
+                                    <td>
+                                        <template if:true={rec.isTextFieldOrTextArea}>
+                                            <lightning-input type="number" variant="label-hidden" label="" data-id={rec.index} name="maxLength" placeholder="Max Length" value={rec.maxLength} onchange={handleInputChange} style="width:100%;"></lightning-input>
+                                        </template>
+                                        <template if:true={rec.isPicklist}>
+                                            <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="picklistValues" placeholder="Picklist Values" value={rec.picklistValues} onchange={handleInputChange} style="width:100%;"></lightning-input>
+                                        </template>
+                                        <template if:true={rec.isCheckbox}>
+                                            <lightning-input disabled type="text" variant="label-hidden" label="" data-id={rec.index} name="checkboxPlaceholder" value="" style="width:100%;"></lightning-input>
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <lightning-button-icon icon-name="utility:delete" alternative-text="Remove" title="Remove" name={rec.index} onclick={removeRow}></lightning-button-icon>
+                                    </td>
+                                </tr>
+                            </template> 
                         </tbody>
                     </table>
                     <div class="slds-p-left_small slds-p-vertical_small">

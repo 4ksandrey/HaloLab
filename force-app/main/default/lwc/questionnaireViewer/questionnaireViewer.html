@@ -24,6 +24,7 @@
                 onrowaction={callRowAction}
                 onrowselection={handleRowSelection}
                 selected-rows={selectedRows}
+                hideсheckboxсolumn=false
                 >
             </lightning-datatable>
         </template>
@@ -52,10 +53,15 @@
                     </header>
                     <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
                         <template for:each={selectedQuestionnaireDetails} for:item="field">
-                            <p key={field.fieldName}>
-                                <b>{field.fieldName}:</b> {field.fieldValue}
-                            </p>
-                        </template>
+                            <lightning-layout-item key={field.fieldName}>
+                                <div class="slds-col slds-size_4-of-7 input-grid">
+                                    <label class="input-label">{field.fieldName}</label>
+                                    <textarea style="width:100%;overflow:auto;" rows="3" class="slds-textarea input-textarea" readonly>
+                                        {field.fields}
+                                    </textarea>
+                                </div>
+                            </lightning-layout-item>
+                        </template>                        
                     </div>
                     <footer class="slds-modal__footer">
                         <button class="slds-button slds-button_brand" onclick={closeModal} title="OK">OK</button>

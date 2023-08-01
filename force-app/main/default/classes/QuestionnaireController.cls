@@ -18,8 +18,8 @@ public with sharing class QuestionnaireController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Questionnaire_Mapper__mdt> getQuestionnairesMdt(String caseType, String questionnaireName) {
-        return [SELECT Name__c, Id__c, Case_Type__c FROM Questionnaire_Mapper__mdt WHERE Case_Type__c = :caseType AND Name__c = :questionnaireName];
+    public static List<T_Questionnaire__c> getQuestionnaireById(Id id) {
+        return [SELECT Name, Id, Case_Type__c, Questionnaire_Name__c, Questionnaire_Id__c, Fields__c FROM T_Questionnaire__c WHERE Id =: id];
     }
 
     @AuraEnabled(cacheable=true)

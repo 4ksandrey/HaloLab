@@ -105,6 +105,7 @@ export default class ViewerEditorTableLWC extends NavigationMixin(LightningEleme
 
     @track isModalOpen = false;
     @track selectedQuestionnaireDetails = {};
+
     openModal() {
         this.isModalOpen = true;
     }
@@ -118,8 +119,9 @@ export default class ViewerEditorTableLWC extends NavigationMixin(LightningEleme
         const fieldsArray = fieldsData.split('\n');
     
         fieldsArray.forEach((field) => {
-            const [fieldName, fieldValue] = field.split(': ');
-            formattedFields.push({ fieldName, fieldValue });
+            const [fieldName, fieldType, fieldValue] = field.split(':');
+            const fields = fieldType + ':' + fieldValue;
+            formattedFields.push({ fieldName, fields });
         });
     
         return formattedFields;
@@ -160,7 +162,7 @@ export default class ViewerEditorTableLWC extends NavigationMixin(LightningEleme
             .catch(error => {
                 this.showErrorToast("Error loading the papaparse library.");
             });
-    }
+    } 
 
     handleDownloadSelected(event) {
         if (this.selectedRows.length === 0) {

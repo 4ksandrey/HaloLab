@@ -10,6 +10,7 @@ import getQuestionnaireList from '@salesforce/apex/CustomQuestionnaireSearch.get
 export default class QuestionnaireEditorCreator extends LightningElement {
     @track selectedCaseType;
     @track caseTypeOptions = [];
+    @track selectedPicklistValue;
     @track questionnaireName;
     @track caseType;
     @wire(getCaseTypeNames)
@@ -30,6 +31,13 @@ export default class QuestionnaireEditorCreator extends LightningElement {
         { label: 'Picklist', value: 'Picklist' },
         { label: 'Checkbox', value: 'Checkbox' },
     ];
+
+    getPicklistFieldName() {
+        if (this.listOfQuestionnaires && this.listOfQuestionnaires.length > 0) {
+            return this.listOfQuestionnaires[2].fieldName;
+        }
+        return '';
+    }
 
     @track selectedFieldType;
 
@@ -95,22 +103,37 @@ export default class QuestionnaireEditorCreator extends LightningElement {
         let index = event.target.dataset.id;
         let fieldName = event.target.name;
         let value = event.target.value;
+    
         for(let i = 0; i < this.listOfQuestionnaires.length; i++) {
             if(this.listOfQuestionnaires[i].index === parseInt(index)) {
                 this.listOfQuestionnaires[i][fieldName] = value;
+                this.listOfQuestionnaires[i].isTextFieldOrTextArea = this.listOfQuestionnaires[i].Picklist === 'Text' || this.listOfQuestionnaires[i].Picklist === 'LongTextArea';
+                this.listOfQuestionnaires[i].isPicklist = this.listOfQuestionnaires[i].Picklist === 'Picklist';
+                this.listOfQuestionnaires[i].isCheckbox = this.listOfQuestionnaires[i].Picklist === 'Checkbox';
             }
         }
-        console.log(this.listOfQuestionnaires);
-    } 
-    
+    }
+
     handleSave() {
         let fieldsData = '';
         this.listOfQuestionnaires.forEach((record, index) => {
-            fieldsData += `${record.Field}:${record.Picklist}:${record.maxLength}`;
+            let fieldData = `${record.Field}:${record.Picklist}:`;
+    
+            if (record.isTextFieldOrTextArea) {
+                fieldData += record.maxLength;
+            } else if (record.isPicklist) {
+                fieldData += record.picklistValues;
+            } else if (record.isCheckbox) {
+                fieldData += ''; 
+            }
+    
+            fieldsData += fieldData;
+    
             if (index < this.listOfQuestionnaires.length - 1) {
                 fieldsData += '\n';
             }
         });
+    
         createNewQuestionnaire({
             questionnaireName: this.questionnaireName,
             caseType: this.caseType,
@@ -145,14 +168,19 @@ export default class QuestionnaireEditorCreator extends LightningElement {
     searchKeyword(event) {
         this.searchValue = event.target.value;
     }
-
+    
     handleSearchKeyword() {
         if (this.searchValue !== '') {
             getQuestionnaireList({
                 searchKey: this.searchValue
             })
                 .then(result => {
-                    this.questionnaires = result;
+                    this.questionnaires = result.map(que => {
+                        return {
+                            ...que,
+                            shortenedField: que.Fields__c && que.Fields__c.length > 50 ? que.Fields__c.substring(0, 50) + '...' : que.Fields__c
+                        }
+                    });
                 })
                 .catch(error => {
                     const event = new ShowToastEvent({
@@ -179,7 +207,18 @@ export default class QuestionnaireEditorCreator extends LightningElement {
     handleUpdate() {
         let fieldsData = '';
         this.listOfQuestionnaires.forEach((record, index) => {
-            fieldsData += `${record.Field}:${record.Picklist}:${record.maxLength}`;
+            let fieldData = `${record.Field}:${record.Picklist}:`;
+    
+            if (record.isTextFieldOrTextArea) {
+                fieldData += record.maxLength;
+            } else if (record.isPicklist) {
+                fieldData += record.picklistValues;
+            } else if (record.isCheckbox) {
+                fieldData += ''; 
+            }
+    
+            fieldsData += fieldData;
+    
             if (index < this.listOfQuestionnaires.length - 1) {
                 fieldsData += '\n';
             }

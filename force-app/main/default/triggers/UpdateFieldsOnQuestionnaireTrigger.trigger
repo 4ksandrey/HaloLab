@@ -1,4 +1,4 @@
-trigger UpdateFieldsOnQuestionnaireTrigger on T_Questionnaire__c (before update) {
+trigger UpdateFieldsOnQuestionnaireTrigger on T_Questionnaire__c (before update, before insert) {
     Map<String, T_Questionnaire__c> questionnaireMap = new Map<String, T_Questionnaire__c>();
     Set<String> questionnaireIds = new Set<String>();
 
@@ -32,4 +32,6 @@ trigger UpdateFieldsOnQuestionnaireTrigger on T_Questionnaire__c (before update)
             }
         }
     }
+
+    
 }
